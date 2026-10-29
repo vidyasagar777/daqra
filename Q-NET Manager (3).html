@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Q-NET Manager</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#eef2f5;--card:#fff;--tx:#0f2230;--mut:#5d7080;--bd:#d3dde5;--ac:#0f8b8d;--ac2:#2f6fed;--ok:#1d8a4e;--wn:#b97a00;--er:#c8402f;--sel:#e3f3f3;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1a24;--card:#152532;--tx:#e6eef3;--mut:#8da3b3;--bd:#25394a;--ac:#35c2c4;--ac2:#6b9bff;--ok:#4cc27f;--wn:#e0a93a;--er:#ef7563;--sel:#17384a}}
+:root[data-theme="dark"]{--bg:#0e1a24;--card:#152532;--tx:#e6eef3;--mut:#8da3b3;--bd:#25394a;--ac:#35c2c4;--ac2:#6b9bff;--ok:#4cc27f;--wn:#e0a93a;--er:#ef7563;--sel:#17384a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 "IBM Plex Sans",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--bd)}
+header h1{font-size:18px;margin:0;font-weight:600}header small{color:var(--mut)}
+nav{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+nav button{border:1px solid transparent;background:none;color:var(--mut);padding:6px 11px;border-radius:6px;font:inherit;cursor:pointer}
+nav button.on{background:var(--sel);color:var(--tx);border-color:var(--ac)}
+nav button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ac2);outline-offset:1px}
+main{padding:14px 16px;max-width:1180px;margin:auto}
+.tab{display:none}.tab.on{display:block}
+.grid{display:grid;gap:12px}.g4{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px 14px;min-width:0}
+.card h2{font-size:14px;margin:0 0 8px;font-weight:600}
+.kpi b{display:block;font-size:24px;font-weight:600}.kpi span{color:var(--mut);font-size:12px}
+.ok{color:var(--ok)}.wn{color:var(--wn)}.er{color:var(--er)}
+label{display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--mut)}
+input,select{font:inherit;padding:5px 7px;border:1px solid var(--bd);border-radius:5px;background:var(--bg);color:var(--tx);width:100%}
+input[type=range]{padding:0}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px}
+button.b{font:inherit;padding:6px 12px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--tx);cursor:pointer}
+button.b.p{background:var(--ac);color:#fff;border-color:var(--ac)}button.b.d{border-color:var(--er);color:var(--er)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--bd)}th{font-weight:500;color:var(--mut);font-size:12px}
+td input{padding:3px 5px;width:76px}
+svg text{fill:var(--mut);font-size:11px;font-family:inherit}
+.map{width:100%;height:auto;background:var(--card);border-radius:6px}
+.lg{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-top:4px}.lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px}
+.alert{padding:5px 8px;border-left:3px solid var(--wn);background:var(--bg);margin-bottom:5px;font-size:13px}.alert.e{border-color:var(--er)}.alert.g{border-color:var(--ok)}
+.verdict{padding:10px 12px;border-radius:6px;font-weight:600;margin:8px 0}
+pre{background:var(--bg);padding:10px;border-radius:6px;overflow:auto;font:12px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap}
+.note{color:var(--mut);font-size:12px}
+textarea{width:100%;font:12px/1.4 ui-monospace,Menlo,monospace;padding:7px;border:1px solid var(--bd);border-radius:5px;background:var(--bg);color:var(--tx)}
+body::before{content:attr(data-wm);position:fixed;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;font-size:clamp(26px,6vw,72px);font-weight:600;color:var(--tx);opacity:.05;transform:rotate(-24deg);pointer-events:none;z-index:50}
+footer{padding:14px 16px 20px;text-align:center;color:var(--mut);font-size:12px;border-top:1px solid var(--bd);margin-top:16px}
+</style></head><body>
+<header><div><h1>Q-NET Manager</h1><small>QKD network planning, simulation and survivability platform. Engineering planning model, not experimentally validated.</small></div>
+<nav id="nav"></nav></header>
+<main><div class='row' style='margin-top:0'><button class='b' onclick='newProj()'>New project</button><button class='b' onclick='saveLS()'>Save in browser</button><button class='b' onclick='openLS()'>Open from browser</button><button class='b' onclick='io(`jo`)'>Export project JSON</button><button class='b' onclick='io(`ji`)'>Import project JSON</button><button class='b' onclick='io(`co`)'>Export links CSV</button><button class='b' onclick='io(`ci`)'>Import links CSV</button></div>
+<div id='iop' class='card' style='display:none;margin-bottom:12px'><div id='iol' class='note'></div><textarea id='iot' rows='8'></textarea><div class='row'><button class='b p' id='iok' onclick='ioApply()'>Load</button><button class='b' onclick='$(`#iop`).style.display=`none`'>Close</button></div></div>
+<section class="tab" id="t-dash">
+<div class="grid g4" id="kpis"></div>
+<div class="grid g2" style="margin-top:12px">
+<div class="card"><h2>Network map</h2><div class="note">Click a node or link to fail it or restore it.</div><div id="map1"></div>
+<div class="lg"><span><i style="background:var(--ok)"></i>Primary</span><span><i style="background:var(--ac2)"></i>Backup</span><span><i style="background:var(--er)"></i>Failed</span><span><i style="background:var(--bd)"></i>Idle</span></div></div>
+<div class="grid" style="align-content:start">
+<div class="card"><h2>Alerts</h2><div id="alerts"></div></div>
+<div class="card"><h2>Simulated mean QBER trend</h2><div id="spark"></div></div></div></div>
+</section>
+
+<section class="tab" id="t-net">
+<div class="card"><h2>Links</h2><div class="scroll" id="ltab"></div>
+<h2 style="margin-top:14px">Add a link</h2>
+<div class="form"><label>From<select id="na"></select></label><label>To<select id="nb"></select></label><label>Distance (km)<input id="nd" type="number" value="40"></label><label>Loss (dB/km)<input id="nl" type="number" step="0.01" value="0.2"></label><label>Disaster vulnerability (0 to 1)<input id="nv" type="number" step="0.05" value="0.2"></label></div>
+<div class="row"><button class="b p" onclick="addLink()">Add link</button></div></div>
+<div class="card" style="margin-top:12px"><h2>Nodes</h2><div class="scroll" id="ntab"></div></div>
+</section>
+
+<section class="tab" id="t-sim">
+<div class="card"><h2>Protocol and hardware parameters</h2><div class="form" id="pform"></div>
+<div class="note" style="margin-top:6px">These parameters also drive link metrics across the whole network.</div></div>
+<div class="grid g2" style="margin-top:12px"><div class="card"><h2>Estimated secret key rate vs distance (kbps)</h2><div id="c1"></div></div>
+<div class="card"><h2>QBER vs distance (%)</h2><div id="c2"></div></div></div>
+<div class="card" style="margin-top:12px"><h2>Operating point</h2><div class="form"><label>Distance (km)<input id="od" type="number" value="72"></label></div><div id="op" class="grid g4" style="margin-top:10px"></div>
+<div id='prov' class='note'></div></div>
+</section>
+
+<section class="tab" id="t-wdm">
+<div class="card"><h2>Classical and quantum channel coexistence</h2><div class="form" id="wform"></div><div id="wres"></div></div>
+<div class="grid g2" style="margin-top:12px"><div class="card"><h2>QBER vs classical launch power (%)</h2><div id="w1"></div></div>
+<div class="card"><h2>SKR vs classical launch power (kbps)</h2><div id="w2"></div></div></div>
+</section>
+
+<section class="tab" id="t-route">
+<div class="card"><h2>Secure-path cost weights</h2><div class="note">C(P) = a QBER + b DVS + c (1 / SKR) + d latency, summed over hops, each term normalized.</div>
+<div class="form" id="rform"></div></div>
+<div class="grid g2" style="margin-top:12px"><div class="card"><h2>Primary and backup route</h2><div id="map2"></div>
+</div>
+<div class="grid" style="align-content:start"><div class="card" id="routes"></div>
+
+</div></div>
+</section>
+
+<section class='tab' id='t-surv'>
+<div class='card'><h2>Disaster model</h2><div class='form'><label>Disaster scenario label<select id='stype' onchange='S.type=this.value'><option>Fiber cut</option><option>Earthquake</option><option>Flood</option><option>Cyclone</option><option>Landslide</option><option>Power failure</option></select></label><label>Disaster intensity I<input id='sk' type='number' step='0.05' min='0' oninput='S.I=+this.value'></label><label>Random seed<input id='sseed' type='number' oninput='S.seed=+this.value'></label><label>Trials<input id='strials' type='number' oninput='S.trials=Math.max(100,+this.value)'></label><label>Restoration time (h)<input id='srec' type='number' oninput='S.rec=+this.value'></label></div><div class='note'>DVS is a normalized vulnerability score in [0, 1]. Each link fails independently with probability p = 1 − exp(−I × DVS), so I = 0 is the no-disaster baseline with p = 0. This is a user-defined model, not a validated hazard model. Nodes are assumed not to fail in the simulation. The scenario label does not change the failure model: all scenarios use the same generic vulnerability-based stochastic model, with no hazard-specific physics. Choose the affected region by clicking nodes or links on the map.</div></div>
+<div class='grid g2' style='margin-top:12px'><div class='card'><h2>Deterministic failure scenarios</h2><div id='map3'></div><div class='row'><button class='b' onclick='scn(`node`)'>Fail a random node</button><button class='b' onclick='scn(`link`)'>Fail a random link</button><button class='b' onclick='scn(`multi`)'>Fail several links</button><button class='b d' onclick='scn(`high`)'>Fail all links with DVS of 0.35 or more</button><button class='b p' onclick='scn(`rec`)'>Recover all</button></div></div>
+<div class='grid' style='align-content:start'><div class='card'><h2>Probabilistic disaster simulation (Monte Carlo)</h2><div class='note'>Seeded Monte Carlo with 95 % confidence intervals, using the disaster model above.</div><div class='row'><button class='b p' onclick='mc()'>Run</button></div><div id='mcr'></div></div><div class='card'><h2>Event log</h2><div id='log' class='note'></div></div></div></div>
+</section>
+<section class='tab' id='t-cal'><div class='card'><h2>Experimental calibration</h2><div class='note'>Paste one measurement per line: distance_km, loss_db_per_km, qber_pct, skr_kbps, classical_launch_dbm (optional). The model uses the parameters set in QKD analysis and WDM analysis.</div><textarea id='calcsv' rows='6' oninput='draw(true)' placeholder='50, 0.2, 2.4, 5.1'></textarea><div class='form'><label>Calibration fraction (%), remaining rows are held out for validation<input type='number' value='70' oninput='S.cal=Math.min(95,Math.max(5,+this.value));draw(true)'></label></div><div class='row'><button class='b p' onclick='draw()'>Compare model with measurements</button><button class='b' onclick='fit()'>Fit detector efficiency and visibility</button></div><div class='scroll' id='calres'></div></div><div class='grid g2' style='margin-top:12px'><div class='card'><h2>QBER, measured vs model (%)</h2><div id='calc1'></div></div><div class='card'><h2>SKR, measured vs model (kbps)</h2><div id='calc2'></div></div></div></section>
+<section class='tab' id='t-asm'><div class='card'><h2>Model and assumptions</h2><div class='note'>Version 0.3 engineering planning model. Results are not experimentally validated unless the Calibration tab shows agreement with your measurements. Planning status is not a cryptographic security claim.</div><table style='min-width:0'><tr><th>Topic</th><th>Assumption or limitation</th></tr><tr><td>Protocols</td><td>BB84: asymptotic decoy-state analysis with infinite decoys (Y1 and e1 from the channel model). COW: heuristic estimate from data-line detection and monitoring-line visibility, with no proven security bound. MDI-QKD: two explicit arms with separate transmittances, Bell-state measurement, leading-order yields and one misalignment error term, asymptotic decoy-state form; check the yield expressions against your own derivation. E91 was removed because no defensible engine exists here.</td></tr><tr><td>Source</td><td>Poissonian weak coherent pulses with mean photon number μ and perfect phase randomization.</td></tr><tr><td>Key-rate naming</td><td>Results are estimated secret key rates under the stated assumptions, not certified secure key rates. No security parameter ε is applied.</td></tr><tr><td>Wavelength grid</td><td>Custom and Experimental modes make no standards claim. ITU-T DWDM mode checks the spacing against multiples of the 12.5 GHz grid of G.694.1. CWDM mode checks multiples of 20 nm.</td></tr><tr><td>Survivability metric</td><td>Proposed metric, not an established standard. Path availability A is the product of (1 − p) over its links. Proposed Protected Path Survivability (PPS) = 1 − (1 − A_primary)(1 − A_backup), exact for link-disjoint paths under independent failures. The Monte Carlo run uses a seeded generator and a Wilson 95 % confidence interval.</td></tr><tr><td>Validation protocol</td><td>Calibration uses a deterministic interleaved split (default 70 % calibration, 30 % held out). Fitted parameters are detector efficiency, visibility and, for rows with a launch power, the peak Raman coefficient. Reported validation error uses held-out rows only. An independent final test set is still needed for publication.</td></tr><tr><td>Hardware integration</td><td>Planned. No device communication exists. The dashboard key pool and QBER trend are simulated.</td></tr><tr><td>Fiber</td><td>Loss equals dB/km times length. No dispersion, polarization drift, splice or connector loss.</td></tr><tr><td>Detector</td><td>Efficiency, dark-count probability per gate, afterpulse probability (first-order background of afterpulse × click probability), dead time (rate factor 1 / (1 + click probability × dead gates)) and timing jitter (efficiency factor erf(gate / (2√2 σ))). First-order approximations, not a detector simulation. No detector side channels.</td></tr><tr><td>QBER</td><td>Dark counts add errors with probability 1/2. Misalignment error e_d = (1 − visibility) / 2 applies to signal events.</td></tr><tr><td>Estimated secret key rate</td><td>R = q × clock × [Q1 (1 − h(e1)) − Q f_EC h(E)] with q = 1/2. Asymptotic: no finite-key bound, no ε, no authentication cost, no side-channel or implementation analysis.</td></tr><tr><td>Authentication, key management</td><td>Not modelled. Trusted-node relaying is assumed. Key consumption is not simulated and the dashboard key pool is illustrative.</td></tr><tr><td>WDM</td><td>Noise = ρ(Δν) × filter bandwidth × launch power × effective length (forward L·e^(−αL), backward (1 − e^(−2αL))/(2α)) plus classical leakage P·e^(−αL)·10^(−isolation/10), converted to counts per gate. ρ(Δν) = ρ_peak × min(Δν / 13 THz, 1) × a Bose factor relative to the 13 THz Stokes peak (Stokes when the classical channel is at the shorter wavelength); held flat beyond 13 THz, an approximation. ρ_peak is a placeholder until calibrated. No four-wave mixing, Brillouin scattering or filter-shape model.</td></tr><tr><td>Routing</td><td>Dijkstra with per-hop cost a·QBER' + b·DVS' + c·(1/SKR)' + d·latency', each min-max normalized over the active links. Default weights are 1: they are not Pareto-derived or sensitivity-tested. Cost sums over hops, so it also favors fewer hops. Path QBER is the worst hop and path SKR the weakest hop. Latency is 5 µs/km plus 0.1 ms per hop. The backup is link-disjoint by default or node-disjoint when selected. SRLG-disjoint protection and Pareto weight generation are not implemented.</td></tr><tr><td>Availability and disaster</td><td>DVS is a normalized vulnerability score, not a probability. Failure probability is p = 1 − exp(−I × DVS) for disaster intensity I. Links fail independently and nodes do not fail in the simulation. No spatial correlation.</td></tr><tr><td>Planning status</td><td>Acceptable means a route exists with QBER at most 5 % and positive key rate under this model.</td></tr><tr><td>Not in this page</td><td>Finite-key analysis, Pareto derivation of the routing weights, hardware APIs, user accounts and roles, database, REST API, PDF and Excel export. The production architecture is React with TypeScript, FastAPI, NetworkX and NumPy engines, PostgreSQL and Docker. This page serves as the UI specification.</td></tr></table></div></section>
+<section class="tab" id="t-rep">
+<div class="card"><h2>QKD network assessment</h2><div class="row"><button class="b p" onclick="report()">Generate report</button><button class="b" onclick="copyRep()">Copy text</button></div><pre id="repout">Select Generate report.</pre></div>
+</section>
+</main><footer id='ft'></footer>
+<script>
+const $=s=>document.querySelector(s),f1=(x,n=2)=>(+x).toFixed(n);
+const WM='Q-NET Manager | Research prototype';document.body.dataset.wm=WM;$('#ft').textContent=WM+' | Engineering planning model: not experimentally validated, not security-certified | v0.3';
+const tabs=[['dash','Dashboard'],['net','Network'],['sim','QKD analysis'],['wdm','WDM analysis'],['route','Secure routing'],['surv','Survivability'],['cal','Calibration'],['rep','Reports'],['asm','Model and assumptions']];
+let cur='dash';
+$('#nav').innerHTML=tabs.map(t=>`<button data-t="${t[0]}" onclick="go('${t[0]}')">${t[1]}</button>`).join('');
+function go(t){cur=t;document.querySelectorAll('.tab').forEach(e=>e.classList.toggle('on',e.id=='t-'+t));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==t));draw()}
+/* ---------- state ---------- */
+let N=[['Alice',60,180],['B',200,70],['C',230,200],['D',190,310],['E',390,150],['F',410,290],['G',540,70],['Bob',650,200]].map(([n,x,y],i,a)=>({n,x,y,t:i==0?'Alice':i==a.length-1?'Bob':'Trusted relay',down:false}));
+let L=[[0,1,45,.2,.15],[0,2,62,.2,.3],[0,3,38,.2,.5],[1,2,30,.21,.2],[1,4,55,.2,.1],[2,4,40,.2,.35],[3,2,35,.22,.45],[3,5,50,.2,.4],[4,6,33,.2,.1],[5,6,42,.2,.2],[4,5,28,.2,.3],[6,7,48,.2,.1],[4,7,60,.2,.25],[5,7,55,.2,.55]].map(([a,b,d,att,dvs])=>({a,b,d,att,dvs,down:false}));
+const P={proto:'BB84',mu:.5,eta:.2,dark:1e-6,clk:10,vis:.98,fec:1.16,cf:.5,gate:1,dead:0,ap:0,jit:0};
+const W={on:false,pw:0,lc:1548,lq:1550.12,iso:110,mode:'Custom',dir:'Counter',rho:1e-11,bw:.2,len:50};
+const R={a:1,b:1,c:1,d:1,s:0,t:7};
+const S={I:.5,type:'Fiber cut',rec:12,seed:12345,trials:20000,cal:70,bkm:'link'};let calInfo='';
+const NT=['Alice','Bob','QKD node','Trusted relay','Optical switch','Network controller','Key management system','Classical node'];
+const INIT=JSON.stringify({N,L,P,W,R,S});
+let log=[],pool=82.4,trend=[2.1],backupOf=null;
+/* ---------- physics ---------- */
+const h=x=>x<=0||x>=1?0:-x*Math.log2(x)-(1-x)*Math.log2(1-x);
+function raman(d,att,w=W){const a=Math.max(att,1e-6)/4.343,Pc=1e-3*Math.pow(10,w.pw/10),Le=w.dir=='Co'?d*Math.exp(-a*d):(1-Math.exp(-2*a*d))/(2*a),ph=(w.rho*rs(w)*w.bw*Pc*Le+Pc*Math.exp(-a*d)*Math.pow(10,-w.iso/10))/1.28e-19;return ph*P.gate*1e-9*P.eta}
+function model(d,att,o={}){const p={...P,...o},jf=p.jit>0?erf(p.gate*1e3/(2.828*p.jit)):1,tr=x=>Math.pow(10,-att*x/10)*p.eta*jf,tcl=()=>p.proto=='MDI-QKD'?(tr(d*p.cf)+tr(d*(1-p.cf)))/2:tr(d),qc=p.dark+(o.noise||0)+1-Math.exp(-tcl()*p.mu),Y0=p.dark+(o.noise||0)+p.ap*qc,ed=(1-p.vis)/2,f=p.fec,mu=p.mu,pr=p.proto;let R=0,E=.5;
+ if(pr=='MDI-QKD'){const eA=tr(d*p.cf),eB=tr(d*(1-p.cf)),g=Math.pow(1-Y0,2),Y11=g*(eA*eB/2+(2*eA+2*eB-3*eA*eB)*Y0+4*(1-eA)*(1-eB)*Y0*Y0),s11=g*eA*eB/2,e11=(.5*(Y11-s11)+ed*s11)/Y11,a=1-Math.exp(-mu*eA),b=1-Math.exp(-mu*eB),Q=g*(a*b/2+(2*a+2*b-3*a*b)*Y0+4*(1-a)*(1-b)*Y0*Y0),sq=g*a*b/2;E=(.5*(Q-sq)+ed*sq)/Q;R=.5*(mu*mu*Math.exp(-2*mu)*Y11*(1-h(e11))-Q*f*h(E))}
+ else if(pr=='COW'){const pd=1-Math.exp(-tr(d)*mu);E=(.5*Y0+ed*pd)/(pd+Y0);R=.9*(pd+Y0)*(1-(1+f)*h(E))}
+ else{const t=tr(d),Q=Y0+1-Math.exp(-t*mu),Y1=Y0+t-Y0*t;E=(.5*Y0+ed*(1-Math.exp(-t*mu)))/Q;R=.5*(mu*Math.exp(-mu)*Y1*(1-h((.5*Y0+ed*t)/Y1))-Q*f*h(E))}
+ return{qber:E*100,skr:Math.max(0,R)*p.clk*1e3/(1+qc*p.dead*p.clk),loss:att*d}}
+const lm=l=>model(l.d,l.att,W.on?{noise:raman(l.d,l.att)}:{});
+const alive=l=>!l.down&&!N[l.a].down&&!N[l.b].down;
+const lat=l=>l.d*.005+.1;
+/* ---------- routing ---------- */
+function lcost(l,m){return R.a*nz(m.qber,NR.q)+R.b*nz(l.dvs,NR.d)+R.c*nz(1/Math.max(m.skr,1e-9),NR.i)+R.d*nz(lat(l),NR.l)}
+function dij(s,t,ban=[]){rng();const dist=N.map(()=>1e9),prev=N.map(()=>null),done=N.map(()=>false);dist[s]=0;
+ for(let k=0;k<N.length;k++){let u=-1;N.forEach((_,i)=>{if(!done[i]&&(u<0||dist[i]<dist[u]))u=i});if(u<0||dist[u]>=1e9)break;done[u]=true;
+  L.forEach((l,i)=>{if(!alive(l)||ban.includes(i)||(l.a!=u&&l.b!=u))return;const m=lm(l);if(m.skr<=0)return;const v=l.a==u?l.b:l.a,c=dist[u]+lcost(l,m);if(c<dist[v]){dist[v]=c;prev[v]=[u,i]}})}
+ if(dist[t]>=1e9)return null;const p=[];let c=t;while(c!=s){p.unshift(prev[c][1]);c=prev[c][0]}return p}
+function pm(p){if(!p)return null;rng();const ms=p.map(i=>lm(L[i]));return{qber:Math.max(...ms.map(m=>m.qber)),skr:Math.min(...ms.map(m=>m.skr)),lat:p.reduce((s,i)=>s+lat(L[i]),0),av:p.reduce((s,i)=>s*(1-pl(L[i])),1)*100,risk:p.reduce((s,i)=>s+L[i].dvs,0)/p.length,hops:p.length,cost:p.reduce((s,i,k)=>s+lcost(L[i],ms[k]),0)}}
+function nodesOf(p,s){let c=s,o=[N[s].n];p.forEach(i=>{c=L[i].a==c?L[i].b:L[i].a;o.push(N[c].n)});return o.join(' → ')}
+function routes(){const pr=dij(R.s,R.t),bk=pr?dij(R.s,R.t,banSet(pr)):null;return{pr,bk}}
+/* ---------- charts ---------- */
+function chart(el,series,o={}){const W_=520,H=230,m={l:46,r:10,t:8,b:30},all=series.flatMap(s=>s.pts),xs=all.map(p=>p[0]),x0=Math.min(...xs),x1=Math.max(...xs),V=y=>o.log?Math.log10(Math.max(y,1e-2)):y;
+ let ys=all.map(p=>V(p[1])),y0=Math.min(...ys),y1=Math.max(...ys);if(o.log)y0=Math.floor(y0);if(y1<=y0)y1=y0+1;
+ const X=x=>m.l+(x-x0)/(x1-x0||1)*(W_-m.l-m.r),Y=y=>H-m.b-(V(y)-y0)/(y1-y0)*(H-m.t-m.b);let g='';
+ const ticks=[];if(o.log){for(let k=Math.ceil(y0);k<=Math.floor(y1);k++)ticks.push([k,Math.pow(10,k)])}else for(let k=0;k<=4;k++){const v=y0+(y1-y0)*k/4;ticks.push([v,v])}
+ ticks.forEach(([v,lab])=>{const y=H-m.b-(v-y0)/(y1-y0)*(H-m.t-m.b);g+=`<line x1="${m.l}" x2="${W_-m.r}" y1="${y}" y2="${y}" stroke="var(--bd)"/><text x="${m.l-5}" y="${y+4}" text-anchor="end">${lab>=100?Math.round(lab):f1(lab,lab<1?2:1)}</text>`});
+ for(let k=0;k<=5;k++){const v=x0+(x1-x0)*k/5;g+=`<text x="${X(v)}" y="${H-12}" text-anchor="middle">${Math.round(v*10)/10}</text>`}
+ g+=`<text x="${(W_+m.l)/2}" y="${H-1}" text-anchor="middle">${o.xl||''}</text>`;
+ series.forEach(s=>g+=`<polyline fill="none" stroke="${s.c}" stroke-width="2" ${s.dash?'stroke-dasharray="5 3"':''} points="${s.pts.map(p=>X(p[0])+','+Y(p[1])).join(' ')}"/>`);
+ $(el).innerHTML=`<svg viewBox="0 0 ${W_} ${H}" class="map" role="img">${g}</svg><div class="lg">${series.map(s=>`<span><i style="background:${s.c}"></i>${s.n}</span>`).join('')}</div>`}
+const COL={BB84:'#0f8b8d','COW':'#2f6fed','MDI-QKD':'#b97a00',E91:'#c8402f'};
+/* ---------- map ---------- */
+function map(el,showR){const {pr,bk}=showR?routes():{};let s='';
+ L.forEach((l,i)=>{const A=N[l.a],B=N[l.b],m=lm(l);let c='var(--bd)',w=2,d='';
+  if(pr&&pr.includes(i)){c='var(--ok)';w=4}else if(bk&&bk.includes(i)){c='var(--ac2)';w=3;d='6 4'}
+  if(!alive(l)){c='var(--er)';d='3 4';w=2}else if(m.skr<=0){c='var(--er)'}
+  s+=`<line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" stroke="${c}" stroke-width="${w}" stroke-dasharray="${d}"/><line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" stroke="transparent" stroke-width="14" style="cursor:pointer" onclick="tl(${i})"/><text x="${(A.x+B.x)/2}" y="${(A.y+B.y)/2-5}" text-anchor="middle">${l.d} km · ${f1(m.qber,1)}%</text>`});
+ N.forEach((n,i)=>{const end=i==R.s||i==R.t;s+=`<g style="cursor:pointer" onclick="tn(${i})"><circle cx="${n.x}" cy="${n.y}" r="${end?17:13}" fill="${n.down?'var(--er)':end?'var(--ac)':'var(--card)'}" stroke="${n.down?'var(--er)':'var(--ac)'}" stroke-width="2.5"/><text x="${n.x}" y="${n.y+(end?32:28)}" text-anchor="middle" style="fill:var(--tx);font-size:12px">${n.n}</text></g>`});
+ $(el).innerHTML=`<svg viewBox="0 0 700 350" class="map" role="img" aria-label="QKD network map">${s}</svg>`}
+function tl(i){L[i].down=!L[i].down;ev(`Link ${N[L[i].a].n}–${N[L[i].b].n} ${L[i].down?'failed':'restored'}`);draw()}
+function tn(i){N[i].down=!N[i].down;ev(`Node ${N[i].n} ${N[i].down?'failed':'restored'}`);draw()}
+function ev(t){log.unshift(new Date().toLocaleTimeString()+'  '+t);log=log.slice(0,8)}
+/* ---------- views ---------- */
+function stats(){const ls=L.filter(alive),ms=ls.map(lm);const aq=ms.length?ms.reduce((s,m)=>s+m.qber,0)/ms.length:0,tk=ms.reduce((s,m)=>s+m.skr,0);return{ls,ms,aq,tk}}
+function dash(){const {ls,ms,aq,tk}=stats(),{pr}=routes();const up=N.filter(n=>!n.down).length,ps=pm(pr);
+ const sec=!pr?['No feasible path','er']:aq>5?['Review needed','wn']:['Acceptable','ok'];
+ $('#kpis').innerHTML=[[`${up}/${N.length}`,'Nodes up'],[`${ls.length}/${L.length}`,'Links active'],[f1(aq)+' %','Mean QBER'],[f1(tk)+' kbps','Aggregate active-link SKR'],[ps?f1(ps.skr)+' kbps':'none','Selected-path bottleneck SKR'],[f1(pool,1)+' Mbit','Simulated key pool'],[sec[0],'Planning status, source to destination',sec[1]]].map(k=>`<div class="card kpi"><b class="${k[2]||''}">${k[0]}</b><span>${k[1]}</span></div>`).join('');
+ map('#map1',true);
+ const al=[];L.forEach((l,i)=>{const nm=N[l.a].n+'–'+N[l.b].n,m=lm(l);if(!alive(l))al.push(['e',`Link ${nm} unavailable`]);else if(m.skr<=0)al.push(['e',`Link ${nm} produces no secret key`]);else{if(m.qber>5)al.push(['',`Link ${nm} QBER at ${f1(m.qber,1)} %`]);if(m.skr<1)al.push(['',`Link ${nm} key rate below 1 kbps`])}});
+ if(!pr)al.unshift(['e','No route between '+N[R.s].n+' and '+N[R.t].n]);
+ $('#alerts').innerHTML=al.length?al.slice(0,7).map(a=>`<div class="alert ${a[0]}">${a[1]}</div>`).join(''):'<div class="alert g">All links within thresholds</div>';
+ spark()}
+function spark(){chart('#spark',[{n:'QBER %',c:'var(--ac)',pts:trend.map((v,i)=>[i,v])}],{xl:'Samples'})}
+function net(){$('#ltab').innerHTML=`<table><tr><th>Link</th><th>Distance km</th><th>Loss dB/km</th><th>Vulnerability</th><th>QBER %</th><th>SKR kbps</th><th>Failed</th><th></th></tr>`+L.map((l,i)=>{const m=lm(l);return`<tr><td>${N[l.a].n}–${N[l.b].n}</td><td><input type="number" value="${l.d}" onchange="L[${i}].d=+this.value;draw()"></td><td><input type="number" step="0.01" value="${l.att}" onchange="L[${i}].att=+this.value;draw()"></td><td><input type="number" step="0.05" min="0" max="1" value="${l.dvs}" onchange="L[${i}].dvs=+this.value;draw()"></td><td class="${m.qber>5?'wn':''}">${f1(m.qber)}</td><td>${f1(m.skr)}</td><td><input type="checkbox" style="width:auto" ${l.down?'checked':''} onchange="L[${i}].down=this.checked;draw()"></td><td><button class="b d" onclick="L.splice(${i},1);draw()">Remove</button></td></tr>`}).join('')+'</table>';
+ $('#ntab').innerHTML=`<table style="min-width:300px"><tr><th>Node</th><th>Role</th><th>Failed</th></tr>`+N.map((n,i)=>`<tr><td>${n.n}</td><td><select style='width:auto' onchange='N[${i}].t=this.value;draw()'>${NT.map(x=>`<option ${n.t==x?'selected':''}>${x}</option>`).join('')}</select></td><td><input type="checkbox" style="width:auto" ${n.down?'checked':''} onchange="N[${i}].down=this.checked;draw()"></td></tr>`).join('')+'</table>';
+ const o=N.map((n,i)=>`<option value="${i}">${n.n}</option>`).join('');if($('#na').options.length!=N.length){$('#na').innerHTML=o;$('#nb').innerHTML=o;$('#nb').value=Math.min(2,N.length-1)}}
+function addLink(){const a=+$('#na').value,b=+$('#nb').value;if(a==b||L.some(l=>(l.a==a&&l.b==b)||(l.a==b&&l.b==a)))return;L.push({a,b,d:+$('#nd').value,att:+$('#nl').value,dvs:+$('#nv').value,down:false});ev('Link added');draw()}
+function field(id,lab,type,val,set,extra=''){return`<label>${lab}<input id="${id}" type="${type}" value="${val}" ${extra} oninput="${set};draw(true)"></label>`}
+function sim(first){if(first!==true||!$('#pform').children.length)$('#pform').innerHTML=`<label>Protocol<select onchange="P.proto=this.value;draw()">${['BB84','COW','MDI-QKD'].map(p=>`<option value='${p}' ${P.proto==p?'selected':''}>${p=='COW'?'COW (heuristic estimator)':p}</option>`).join('')}</select></label>`+field('f1','Mean photon number','number',P.mu,'P.mu=+this.value','step="0.05"')+field('f2','Detector efficiency','number',P.eta,'P.eta=+this.value','step="0.01"')+field('f3','Dark count probability / gate','number',P.dark,'P.dark=+this.value','step="1e-7"')+field('f4','Clock (MHz)','number',P.clk,'P.clk=+this.value')+field('f5','Optical visibility','number',P.vis,'P.vis=+this.value','step="0.005"')+field('f6','Error-correction efficiency f_EC','number',P.fec,'P.fec=+this.value','step="0.01"')+field('f7','MDI: Charlie position (fraction of distance from Alice)','number',P.cf,'P.cf=+this.value','step="0.05"')+field('f8','Gate width (ns)','number',P.gate,'P.gate=+this.value')+field('f9','Detector dead time (µs)','number',P.dead,'P.dead=+this.value','step="0.1"')+field('f10','Afterpulse probability','number',P.ap,'P.ap=+this.value','step="0.001"')+field('f11','Timing jitter (ps, 0 = ideal)','number',P.jit,'P.jit=+this.value');
+ const mk=(pro,att)=>{const pts=[];for(let d=0;d<=240;d+=6)pts.push([d,model(d,att,{proto:pro})]);return pts};
+ chart('#c1',['BB84','COW','MDI-QKD'].map(p=>({n:p,c:COL[p],pts:mk(p,.2).map(x=>[x[0],x[1].skr]),dash:p!=P.proto})),{log:true,xl:'Distance (km)'});
+ chart('#c2',['BB84','COW','MDI-QKD'].map(p=>({n:p,c:COL[p],pts:mk(p,.2).filter(x=>x[1].skr>0).map(x=>[x[0],x[1].qber]),dash:p!=P.proto})),{xl:'Distance (km)'});
+ const m=model(+$('#od').value,.2);$('#op').innerHTML=[['QBER',f1(m.qber)+' %'],['Estimated secret key rate',f1(m.skr)+' kbps'],['Channel loss',f1(m.loss,1)+' dB'],['Planning status',m.skr>0?(m.qber>8?'Marginal':'Acceptable'):'No key']].map(k=>`<div class="kpi"><b>${k[1]}</b><span>${k[0]}</span></div>`).join('');prov()}
+function wdm(first){if(first!==true||!$('#wform').children.length)$('#wform').innerHTML=field('w1','Classical launch power (dBm)','number',W.pw,'W.pw=+this.value','min="-30" max="5"')+field('w2','Classical wavelength (nm)','number',W.lc,'W.lc=+this.value','step="0.01"')+field('w2b','Quantum wavelength (nm)','number',W.lq,'W.lq=+this.value','step="0.01"')+sel('Wavelength grid mode','W.mode',W.mode,['Custom','ITU-T DWDM grid','CWDM','Experimental'])+sel('Classical propagation','W.dir',W.dir,['Counter','Co'])+field('w5','Raman coefficient (1/km/nm)','number',W.rho,'W.rho=+this.value','step="1e-11"')+field('w6','Quantum filter bandwidth (nm)','number',W.bw,'W.bw=+this.value','step="0.05"')+field('w3','Total classical-to-quantum isolation (dB)','number',W.iso,'W.iso=+this.value')+`<label>Apply to whole network<select onchange="W.on=this.value=='1';draw()"><option value="0" ${W.on?'':'selected'}>No</option><option value="1" ${W.on?'selected':''}>Yes</option></select></label>`+field('w4','Fiber length for analysis (km)','number',W.len,'W.len=+this.value');
+ const D=W.len||50,att=.2,base=model(D,att),m=model(D,att,{noise:raman(D,att)});
+ const mx=(()=>{let b=null;for(let p=-30;p<=5;p++){const r=model(D,att,{noise:raman(D,att,{...W,pw:p})});if(r.skr>.5*base.skr&&r.qber<5)b=p}return b})();
+ const v=m.skr<=0?['Planning status: not acceptable, no secret key','er']:m.qber>5?['Planning status: marginal, QBER degraded','wn']:['Planning status: acceptable under the planning model','ok'];
+ $('#wres').innerHTML=`<div class="verdict ${v[1]}" style="border:1px solid currentColor">${v[0]}</div><div class="grid g4"><div class="kpi"><b>${f1(m.qber)} %</b><span>QBER (clean ${f1(base.qber)} %)</span></div><div class="kpi"><b>${f1(m.skr)} kbps</b><span>SKR (clean ${f1(base.skr)})</span></div><div class="kpi"><b>${(10*Math.log10(raman(D,att)/P.dark+1e-12)).toFixed(1)} dB</b><span>Noise vs dark counts</span></div><div class="kpi"><b>${mx===null?'none':mx+' dBm'}</b><span>Max launch power (QBER under 5 %, SKR over half)</span></div></div><p class="note">${gridMsg()} Detuning ${f1(Math.abs(W.lc-W.lq),2)} nm gives a relative Raman spectral factor of ${f1(rs(W),3)} (${W.lq>W.lc?'Stokes':'anti-Stokes'}). Model: spontaneous Raman scattering (forward or backward, effective length) plus residual leakage of the classical channel, converted to counts per gate. The peak coefficient ρ is a placeholder until calibrated. No four-wave mixing, Brillouin scattering or filter-shape model. Validation status: ${calInfo||'not experimentally validated'}.</p>`;
+ const pts=[];for(let p=-30;p<=5;p++)pts.push([p,model(D,att,{noise:raman(D,att,{...W,pw:p})})]);
+ chart('#w1',[{n:'QBER',c:'var(--er)',pts:pts.map(x=>[x[0],x[1].qber])}],{xl:'Launch power (dBm)'});chart('#w2',[{n:'SKR',c:'var(--ac)',pts:pts.map(x=>[x[0],x[1].skr])}],{log:true,xl:'Launch power (dBm)'})}
+function route(first){if(first!==true||!$('#rform').children.length)$('#rform').innerHTML=`<label>Weight preset<select onchange='wp(this.value)'><option value='c'>Custom</option><option value='e'>Equal weights</option><option value='p'>Previously reported weights (derivation not in this tool)</option></select></label><label>Backup type<select onchange='S.bkm=this.value;draw()'><option value='link' ${S.bkm=='link'?'selected':''}>Link-disjoint</option><option value='node' ${S.bkm=='node'?'selected':''}>Node-disjoint</option></select></label>`+[['a','QBER weight a'],['b','Vulnerability weight b'],['c','Key-rate weight c'],['d','Latency weight d']].map(([k,l])=>`<label>${l}: <span id="v${k}">${R[k]}</span><input type="range" min="0" max="3" step="0.001" value="${R[k]}" oninput="R.${k}=+this.value;$('#v${k}').textContent=this.value;draw(true)"></label>`).join('')+['s','t'].map(k=>`<label>${k=='s'?'Source':'Destination'}<select onchange="R.${k}=+this.value;draw()">${N.map((n,i)=>`<option value="${i}" ${R[k]==i?'selected':''}>${n.n}</option>`).join('')}</select></label>`).join('');
+ map('#map2',true);const {pr,bk}=routes(),a=pm(pr),b=pm(bk);
+ const blk=(t,p,m)=>p?`<h2>${t}</h2><div><b>${nodesOf(p,R.s)}</b></div><div class="note">worst-link QBER ${f1(m.qber)} % · bottleneck SKR ${f1(m.skr)} kbps · latency ${f1(m.lat)} ms · availability ${f1(m.av,1)} % · disaster risk ${m.risk<.2?'low':m.risk<.35?'medium':'high'} · cost ${f1(m.cost)}</div>`:`<h2>${t}</h2><div class="er">None available</div>`;
+ $('#routes').innerHTML=blk('Recommended route (lowest planning cost)',pr,a)+'<hr style="border:0;border-top:1px solid var(--bd)">'+blk('Backup route (link-disjoint)',bk,b);
+ }
+function scn(k){const up=L.map((l,i)=>i).filter(i=>!L[i].down);const rnd=a=>a[Math.floor(Math.random()*a.length)];
+ if(k=='rec'){N.forEach(n=>n.down=false);L.forEach(l=>l.down=false);ev('All elements recovered')}
+ if(k=='node'){const i=rnd([1,2,3,4,5,6]);N[i].down=true;ev(`Node ${N[i].n} failed; rerouting`)}
+ if(k=='link'){const i=rnd(up);L[i].down=true;ev(`Link ${N[L[i].a].n}–${N[L[i].b].n} failed; rerouting`)}
+ if(k=='multi'){for(let j=0;j<3;j++){const i=rnd(up);L[i].down=true}ev('Three links failed; rerouting')}
+ if(k=='high'){L.forEach(l=>{if(l.dvs>=.35)l.down=true});ev('High intensity event: links with vulnerability of 0.35 or more failed')}
+ draw()}
+function conn(dead){const seen=new Set([R.s]),q=[R.s];while(q.length){const u=q.shift();L.forEach((l,i)=>{if(dead[i]||!alive({...l,down:false})||(l.a!=u&&l.b!=u))return;const v=l.a==u?l.b:l.a;if(!seen.has(v)){seen.add(v);q.push(v)}})}return seen.has(R.t)}
+function mc(){const {pr,bk}=routes();let any=0,prot=0,T=S.trials;const rnd=prng(S.seed);for(let t=0;t<T;t++){const dead=L.map(l=>rnd()<pl(l)||l.down);if(conn(dead))any++;const ok=p=>p&&p.every(i=>!dead[i]);if(ok(pr)||ok(bk))prot++}
+ $('#mcr').innerHTML=`<div class="grid g4" style="margin-top:8px"><div class="kpi"><b>${f1(any/T*100,1)} %</b><span>Any path survives, 95 % Wilson CI ${wl(any,T)}</span></div><div class="kpi"><b>${f1(prot/T*100,1)} %</b><span>Primary or backup survives, 95 % Wilson CI ${wl(prot,T)}. Analytic PPS ${f1(sr()*100,1)} %</span></div><div class="kpi"><b>${f1((1-prot/T)*S.rec,1)} h</b><span>Expected outage per ${S.type.toLowerCase()} event</span></div></div>`}
+function report(){const {ls,ms,aq,tk}=stats(),{pr,bk}=routes(),a=pm(pr),crit=L.filter(l=>l.dvs>=.4).length,bad=ms.filter(m=>m.qber>5||m.skr<1).length;
+ $('#repout').textContent=`QKD NETWORK PLANNING ASSESSMENT (engineering planning model)
+Generated: ${new Date().toLocaleString()}
+
+Network: ${N.length} nodes, ${L.length} links (${ls.length} active)
+Protocol: ${P.proto}, mu ${P.mu}, detector efficiency ${P.eta}, clock ${P.clk} MHz, f_EC ${P.fec}
+Security model: ${SEC[P.proto]}
+Validation status: ${calInfo||'not experimentally validated'}
+WDM coexistence noise applied: ${W.on?'yes, '+W.pw+' dBm classical launch':'no'}
+
+Calibration: ${calInfo||'none, model uncalibrated'}
+Disaster model: ${S.type}, intensity I ${S.I}, p = 1 - exp(-I x DVS), restoration ${S.rec} h, seed ${S.seed}
+Planning status: ${pr?(aq>5?'review needed':'acceptable'):'no feasible path'}
+
+Mean QBER: ${f1(aq)} %
+Aggregate active-link SKR: ${f1(tk)} kbps
+Links below threshold (QBER over 5 % or SKR under 1 kbps): ${bad}
+High-vulnerability links (0.4 or more): ${crit}
+
+Route ${N[R.s].n} to ${N[R.t].n}
+Primary: ${pr?nodesOf(pr,R.s)+`  (worst-link QBER ${f1(a.qber)} %, bottleneck SKR ${f1(a.skr)} kbps, ${f1(a.lat)} ms)`:'none'}
+Backup:  ${bk?nodesOf(bk,R.s):'none'}
+
+Recommendations:
+${pr?'':'- Restore connectivity: no secure path exists.\n'}${bk?'':'- Add a link-disjoint backup path.\n'}${bad?'- Shorten or re-engineer weak links, or reduce classical launch power.\n':''}${crit?'- Reinforce or reroute around high-vulnerability links.\n':''}- Run the seeded Monte Carlo survivability simulation before sign-off.
+
+${WM}. Planning estimate only: not a security certification and not a hardware-validated result.`}
+function copyRep(){try{navigator.clipboard.writeText($('#repout').textContent)}catch(e){const r=document.createRange();r.selectNode($('#repout'));getSelection().addRange(r)}}
+function surv(){map('#map3',true);$('#stype').value=S.type;$('#sk').value=S.I;$('#sseed').value=S.seed;$('#strials').value=S.trials;$('#srec').value=S.rec;$('#log').innerHTML=log.length?log.join('<br>'):'No events yet.'}
+function rows(){return $('#calcsv').value.split('\n').map(s=>s.split(',').map(x=>x.trim()===''?NaN:+x)).filter(r=>r.length>=4&&r.slice(0,4).every(isFinite))}
+const pred=(r,o={})=>model(r[0],r[1],{...o,noise:isFinite(r[4])?raman(r[0],r[1],{...W,pw:r[4]}):0});
+function st(a,b){const n=a.length,e=a.map((x,i)=>b[i]-x),mean=a.reduce((s,x)=>s+x,0)/n,ss=a.reduce((s,x)=>s+(x-mean)**2,0),se=e.reduce((s,x)=>s+x*x,0);return{rmse:Math.sqrt(se/n),mae:e.reduce((s,x)=>s+Math.abs(x),0)/n,max:Math.max(...e.map(Math.abs)),r2:ss>0?1-se/ss:NaN}}
+function cal(){const rs=rows().sort((a,b)=>a[0]-b[0]);if(!rs.length){$('#calres').innerHTML='<div class="note">No valid rows yet.</div>';$('#calc1').innerHTML='';$('#calc2').innerHTML='';return}
+ const pr=rs.map(r=>pred(r)),sp=rs.map((r,i)=>isCal(i)),ci=rs.map((r,i)=>i).filter(i=>sp[i]),vi=rs.map((r,i)=>i).filter(i=>!sp[i]),sub=(ix,k)=>ix.length?st(ix.map(i=>rs[i][k]),ix.map(i=>k==2?pr[i].qber:pr[i].skr)):null,sq=sub(ci,2),ss=sub(ci,3),vq=sub(vi,2),vs=sub(vi,3);calInfo=vq?`held-out validation on ${vi.length} points, RMSE QBER ${f1(vq.rmse)} %, RMSE SKR ${f1(vs.rmse)} kbps (${ci.length} points used for calibration)`:'no held-out validation data';
+ const e=(a,b)=>a>0?f1((b-a)/a*100,1):'n/a';
+ $('#calres').innerHTML=`<table><tr><th>Set</th><th>Distance km</th><th>QBER meas.</th><th>QBER model</th><th>Error %</th><th>SKR meas.</th><th>SKR model</th><th>Error %</th></tr>`+rs.map((r,i)=>{const m=pr[i];return`<tr><td>${sp[i]?'calibration':'validation'}</td><td>${r[0]}</td><td>${r[2]}</td><td>${f1(m.qber)}</td><td>${e(r[2],m.qber)}</td><td>${r[3]}</td><td>${f1(m.skr)}</td><td>${e(r[3],m.skr)}</td></tr>`}).join('')+`</table><table style='margin-top:10px'><tr><th>Metric</th><th>RMSE</th><th>MAE</th><th>R²</th><th>Max error</th></tr>`+[['QBER, calibration set (%)',sq],['SKR, calibration set (kbps)',ss],['QBER, held-out validation (%)',vq],['SKR, held-out validation (kbps)',vs]].filter(x=>x[1]).map(([n,s])=>`<tr><td>${n}</td><td>${f1(s.rmse)}</td><td>${f1(s.mae)}</td><td>${isNaN(s.r2)?'n/a':f1(s.r2)}</td><td>${f1(s.max)}</td></tr>`).join('')+'</table>';
+ chart('#calc1',[{n:'Measured',c:'var(--ac2)',pts:rs.map(r=>[r[0],r[2]])},{n:'Model',c:'var(--ac)',dash:true,pts:rs.map((r,i)=>[r[0],pr[i].qber])}],{xl:'Distance (km)'});
+ chart('#calc2',[{n:'Measured',c:'var(--ac2)',pts:rs.map(r=>[r[0],r[3]])},{n:'Model',c:'var(--ac)',dash:true,pts:rs.map((r,i)=>[r[0],pr[i].skr])}],{log:true,xl:'Distance (km)'})}
+function fit(){const rs=rows().sort((a,b)=>a[0]-b[0]).filter((r,i)=>isCal(i));if(!rs.length)return;let b=null;for(let e=.05;e<=.6;e+=.01)for(let v=.9;v<=1;v+=.005){let s=0;rs.forEach(r=>{const m=pred(r,{eta:e,vis:v});s+=Math.pow((m.qber-r[2])/Math.max(r[2],.5),2)+Math.pow(Math.log((m.skr+.01)/(r[3]+.01)),2)});if(!b||s<b.s)b={s,e,v}}
+ P.eta=+b.e.toFixed(2);P.vis=+b.v.toFixed(3);const wr=rs.filter(r=>isFinite(r[4]));if(wr.length){let bs=1e99,br=W.rho;for(let k=-13;k<=-8;k+=.25){W.rho=Math.pow(10,k);let s=0;wr.forEach(r=>{s+=Math.pow((pred(r).qber-r[2])/Math.max(r[2],.5),2)});if(s<bs){bs=s;br=W.rho}}W.rho=br}ev(`Fitted detector efficiency ${P.eta} and visibility ${P.vis}`);draw()}
+function asm(){}
+function load(o){N=o.N;L=o.L;Object.assign(P,o.P);Object.assign(W,o.W);Object.assign(R,o.R);Object.assign(S,o.S);$('#calcsv').value=o.calcsv||'';R.s=Math.min(R.s,N.length-1);R.t=Math.min(R.t,N.length-1);draw()}
+function newProj(){load(JSON.parse(INIT));ev('New project')}
+function msg(t){$('#iop').style.display='block';$('#iok').style.display='none';$('#iot').value='';$('#iol').textContent=t}
+function saveLS(){try{localStorage.setItem('qnet',JSON.stringify({N,L,P,W,R,S,calcsv:$('#calcsv').value}));msg('Saved in this browser.')}catch(e){msg('Browser storage is unavailable here. Use Export project JSON instead.')}}
+function openLS(){try{const v=localStorage.getItem('qnet');if(!v)return msg('No saved project in this browser.');load(JSON.parse(v));msg('Project opened.')}catch(e){msg('Could not open the saved project.')}}
+let ioMode='';
+function io(m){ioMode=m;$('#iop').style.display='block';$('#iok').style.display=m.endsWith('i')?'':'none';$('#iol').textContent={jo:'Project JSON. Copy it and keep it.',ji:'Paste project JSON, then load.',co:'Links CSV. Copy it and keep it.',ci:'Paste links CSV with header NodeA,NodeB,Distance,Loss,DVS, then load. The first node becomes the source and the last the destination.'}[m];$('#iot').value=m=='jo'?JSON.stringify({N,L,P,W,R,S,calcsv:$('#calcsv').value},null,1):m=='co'?'NodeA,NodeB,Distance,Loss,DVS\n'+L.map(l=>[N[l.a].n,N[l.b].n,l.d,l.att,l.dvs].join(',')).join('\n'):''}
+function ioApply(){try{const v=$('#iot').value;if(ioMode=='ji')load(JSON.parse(v));else{const ls=v.trim().split('\n').slice(/distance/i.test(v.split('\n')[0])?1:0).map(s=>s.split(',').map(x=>x.trim())).filter(r=>r.length>=5&&isFinite(r[2]));if(!ls.length)throw new Error('no valid link rows');const nm=[];ls.forEach(r=>[r[0],r[1]].forEach(n=>{if(!nm.includes(n))nm.push(n)}));const k=nm.length;
+ load({N:nm.map((n,i)=>({n,x:350+280*Math.cos(i*6.2832/k+3.1416),y:175+125*Math.sin(i*6.2832/k+3.1416),t:i==0?'Alice':i==k-1?'Bob':'QKD node',down:false})),L:ls.map(r=>({a:nm.indexOf(r[0]),b:nm.indexOf(r[1]),d:+r[2],att:+r[3],dvs:+r[4],down:false})),R:{s:0,t:k-1}})}
+ $('#iop').style.display='none'}catch(e){$('#iol').textContent='Could not read the input: '+e.message}}
+const SEC={BB84:'Asymptotic decoy-state BB84 (infinite decoys, Poisson source), no finite-key bound, epsilon not applied',COW:'Heuristic COW estimate from data-line statistics and monitoring visibility, no proven security bound','MDI-QKD':'Asymptotic decoy-state MDI-QKD with two explicit arms and Bell-state measurement, leading-order yields, no finite-key bound'};
+const pl=l=>1-Math.exp(-S.I*l.dvs),nz=(v,[a,b])=>b>a?(v-a)/(b-a):0;let NR={};
+function rng(){const ms=L.filter(alive).map(l=>[lm(l),l]).filter(x=>x[0].skr>0),r=g=>{const v=ms.map(g);return[Math.min(...v),Math.max(...v)]};NR={q:r(x=>x[0].qber),i:r(x=>1/x[0].skr),l:r(x=>lat(x[1])),d:r(x=>x[1].dvs)}}
+function prng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function sr(){const {pr,bk}=routes(),A=p=>p?p.reduce((s,i)=>s*(1-pl(L[i])),1):0;return 1-(1-A(pr))*(1-A(bk))}
+const sel=(lab,path,val,o)=>`<label>${lab}<select onchange="${path}=this.value;draw()">${o.map(x=>`<option ${val==x?'selected':''}>${x}</option>`).join('')}</select></label>`;
+function gridMsg(){const dl=Math.abs(W.lc-W.lq),gh=124.8*dl,m=W.mode;return m=='ITU-T DWDM grid'?(Math.abs(gh/12.5-Math.round(gh/12.5))<.02?`Spacing ${f1(gh,1)} GHz fits the 12.5 GHz ITU-T G.694.1 grid.`:`Spacing ${f1(gh,1)} GHz is not a multiple of the 12.5 GHz ITU-T G.694.1 grid.`):m=='CWDM'?(dl>0&&Math.abs(dl%20)<.01?'Spacing is a multiple of the 20 nm CWDM grid.':'Spacing is not a multiple of the 20 nm CWDM grid.'):`Spacing ${f1(gh,1)} GHz. Custom and Experimental modes make no standards claim.`}
+function prov(){$('#prov').innerHTML=`<b>Model:</b> ${SEC[P.proto]}<br><b>Parameters:</b> mu ${P.mu}, detector efficiency ${P.eta}, dark ${P.dark}, clock ${P.clk} MHz, f_EC ${P.fec}, visibility ${P.vis}${P.proto=='MDI-QKD'?', Charlie at '+P.cf+' of the distance':''}<br><b>Uncertainty:</b> deterministic model, no statistical or finite-size uncertainty<br><b>Validation status:</b> ${calInfo?'compared with measurements: '+calInfo:'not experimentally validated'}${P.proto=='COW'?'<br><b class="wn">Heuristic estimator: calibration required, not a security bound.</b>':''}`}
+function erf(x){const t=1/(1+.3275911*Math.abs(x)),y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x);return x>=0?y:-y}
+function rs(w){const c=299792458,dv=Math.abs(c/(w.lc*1e-9)-c/(w.lq*1e-9));if(dv<1e9)return 0;const k=6.626e-34/(1.381e-23*300),n=1/(Math.exp(k*dv)-1),n13=1/(Math.exp(k*13e12)-1);return Math.min(dv/13e12,1)*(w.lq>w.lc?n+1:n)/(n13+1)}
+const isCal=i=>((i*.6180339887)%1)<S.cal/100;
+function wp(v){if(v=='e'){R.a=R.b=R.c=R.d=1;draw()}if(v=='p'){R.a=.423;R.b=.102;R.c=.452;R.d=.0233;draw()}}
+function banSet(p){if(S.bkm!='node')return p;const nd=new Set();let c=R.s;p.forEach(i=>{c=L[i].a==c?L[i].b:L[i].a;if(c!=R.t)nd.add(c)});return L.map((l,i)=>i).filter(i=>p.includes(i)||nd.has(L[i].a)||nd.has(L[i].b))}
+function wl(k,n){const z=1.96,p=k/n,d=1+z*z/n,c=(p+z*z/(2*n))/d,w=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/d;return`[${f1((c-w)*100,1)}, ${f1((c+w)*100,1)}] %`}
+function draw(light){({dash,net,sim,wdm,route,surv,cal,rep:()=>{},asm})[cur](light)}
+setInterval(()=>{const {aq,tk}=stats();trend.push(Math.max(0,aq+(Math.random()-.5)*.25));if(trend.length>40)trend.shift();pool+=tk*1.5/1000;if(cur=='dash')dash()},1500);
+go('dash');
+</script></body></html>
