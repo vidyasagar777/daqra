@@ -45,7 +45,7 @@ textarea{width:100%;font:12px/1.4 ui-monospace,Menlo,monospace;padding:7px;borde
 body::before{content:attr(data-wm);position:fixed;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;font-size:clamp(26px,6vw,72px);font-weight:600;color:var(--tx);opacity:.05;transform:rotate(-24deg);pointer-events:none;z-index:50}
 footer{padding:14px 16px 20px;text-align:center;color:var(--mut);font-size:12px;border-top:1px solid var(--bd);margin-top:16px}
 </style></head><body>
-<header><div><h1>Q-NET Manager</h1><small>QKD network planning, simulation and survivability platform. Engineering planning model, not experimentally validated.</small></div>
+<header><div><h1>Q-NET Manager</h1><small>QKD network planning, simulation and survivability platform.</small></div>
 <nav id="nav"></nav></header>
 <main><div class='row' style='margin-top:0'><button class='b' onclick='newProj()'>New project</button><button class='b' onclick='saveLS()'>Save in browser</button><button class='b' onclick='openLS()'>Open from browser</button><button class='b' onclick='io(`jo`)'>Export project JSON</button><button class='b' onclick='io(`ji`)'>Import project JSON</button><button class='b' onclick='io(`co`)'>Export links CSV</button><button class='b' onclick='io(`ci`)'>Import links CSV</button></div>
 <div id='iop' class='card' style='display:none;margin-bottom:12px'><div id='iol' class='note'></div><textarea id='iot' rows='8'></textarea><div class='row'><button class='b p' id='iok' onclick='ioApply()'>Load</button><button class='b' onclick='$(`#iop`).style.display=`none`'>Close</button></div></div>
@@ -105,7 +105,7 @@ footer{padding:14px 16px 20px;text-align:center;color:var(--mut);font-size:12px;
 </main><footer id='ft'></footer>
 <script>
 const $=s=>document.querySelector(s),f1=(x,n=2)=>(+x).toFixed(n);
-const WM='Q-NET Manager | Research prototype';document.body.dataset.wm=WM;$('#ft').textContent=WM+' | Engineering planning model: not experimentally validated, not security-certified | v0.3';
+const WM='Q-NET Manager | Vidyasagar Solutions';document.body.dataset.wm=WM;$('#ft').textContent=WM+' | Engineering planning model: not experimentally validated, not security-certified | v0.3';
 const tabs=[['dash','Dashboard'],['net','Network'],['sim','QKD analysis'],['wdm','WDM analysis'],['route','Secure routing'],['surv','Survivability'],['cal','Calibration'],['rep','Reports'],['asm','Model and assumptions']];
 let cur='dash';
 $('#nav').innerHTML=tabs.map(t=>`<button data-t="${t[0]}" onclick="go('${t[0]}')">${t[1]}</button>`).join('');
